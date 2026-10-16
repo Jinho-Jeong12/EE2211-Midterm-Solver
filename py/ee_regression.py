@@ -30,7 +30,11 @@ Notation used in the comments
   W = learned weights (d x h), w when h = 1
 """
 from itertools import combinations_with_replacement   # all ways to pick features WITH repetition -> polynomial terms
-from math import comb                                  # comb(n, k) = n choose k, for counting parameters
+from scipy.special import comb as _comb                # n choose k (math.comb needs Python 3.8+; the course env is 3.7)
+
+
+def comb(n, k):
+    return int(_comb(n, k, exact=True))                # exact=True -> whole number, not a float
 import numpy as np
 from ee_utils import Report, fmt                       # Report prints Given / Formula / Steps / ANSWER; fmt formats numbers
 
