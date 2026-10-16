@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+node_modules/
+# generated from the lecture PDFs (course material, not mine to publish)
+src/slides_data.js
+EE2211_Solver.html
