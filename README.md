@@ -6,6 +6,9 @@
 
 ## Web version (Lecture 1–6)
 
+> The ready-to-open web version is **`EE2211_Solver_web.html`** (download it and double-click). It is built from `src/` by `build_public.py`.
+> The Slide Finder is empty in this public copy, because the lecture slides belong to the course and are not mine to publish.
+
 **Open `EE2211_Solver.html` by double-clicking it.** It is one file that runs in Chrome, Safari, or Edge with **no internet and no install**.
 Your inputs are saved automatically in the browser (localStorage).
 
