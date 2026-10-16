@@ -1,5 +1,8 @@
 # EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
 
+> **Development history:** see the [Development history](#development-history) section at the bottom of this page.
+> The dates come from the files' Created / Modified times on my laptop (macOS Finder → Get Info).
+
 A set of plain Python functions for the EE2211 Lecture 1–6 topics, which I prepared for the midterm.
 It follows the midterm rule: **plain `.py` files only. No graphical user interface (GUI), no web page, and no AI tool runs inside it.**
 It needs only `numpy`, `scipy` and `sympy`.

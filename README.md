@@ -1,4 +1,10 @@
-# EE2211 Solver (Lecture 1–6, Midterm)
+# EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
+
+> **Development history:** see [`py/README.md` → Development history](py/README.md#development-history).
+> It lists what I built on each date (2 Sep – 16 Oct 2026) and the files that show it.
+> The same dates can be checked on my laptop in macOS Finder (select a file → Get Info → Created / Modified).
+
+## Web version (Lecture 1–6)
 
 **Open `EE2211_Solver.html` by double-clicking it.** It is one file that runs in Chrome, Safari, or Edge with **no internet and no install**.
 Your inputs are saved automatically in the browser (localStorage).
