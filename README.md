@@ -4,15 +4,27 @@
 > It lists what I built on each date (2 Sep – 16 Oct 2026) and the files that show it.
 > The same dates can be checked on my laptop in macOS Finder (select a file → Get Info → Created / Modified).
 
-## Web version (Lecture 1–6)
+## How to run it (quick start)
 
-> The ready-to-open web version is **`EE2211_Solver_web.html`** (download it and double-click). It is built from `src/` by `build_public.py`.
-> The Slide Finder is empty in this public copy, because the lecture slides belong to the course and are not mine to publish.
+### Web version — `EE2211_Solver_web.html` (the original program, 25 Sep – 15 Oct)
+1. On this GitHub page, click **[`EE2211_Solver_web.html`](EE2211_Solver_web.html)** in the file list.
+2. Click the **Download raw file** button (the ⬇ icon at the top right of the file view).
+3. **Double-click the downloaded file.** It opens in Chrome, Safari or Edge. It works **with no internet and no install**.
+4. Pick a topic from the home page or the left menu (or type a keyword in the search box), enter the numbers from the question, and press **Solve** (or `Ctrl / ⌘ + Enter`).
+5. Read the yellow **Final Answer** box. The working (Given → Formula → Steps → Check) is shown above and below it.
 
-**Open `EE2211_Solver.html` by double-clicking it.** It is one file that runs in Chrome, Safari, or Edge with **no internet and no install**.
-Your inputs are saved automatically in the browser (localStorage).
+Example: *Linear Regression → Train + Predict* → paste X and y → tick "add bias" → enter X_new → Solve → the weights w and the prediction ŷ appear in the yellow box.
 
-## Usage
+Notes: inputs are saved automatically in the browser (localStorage). The Slide Finder is empty in this public copy, because the lecture slides belong to the course and are not mine to publish.
+The file is built from `src/` by `build_public.py`. Some explanation texts in the web version are in Korean (my first language); I wrote them as study notes while building it.
+
+### Python version — `py/` folder (for the midterm rule: plain scripts, no graphical interface)
+1. Download this repository (green **Code** button → **Download ZIP**) and unzip it.
+2. Open `py/EE2211_exam.ipynb` in Jupyter or VS Code (needs `numpy`, `scipy`, `sympy`).
+3. Run any cell with **Shift + Enter**: every cell loads the solver by itself. Change the numbers to the question's numbers.
+4. Read the lines marked `>>> ANSWER`. Details: [`py/README.md`](py/README.md).
+
+## Web version — usage details (Lecture 1–6)
 - Pick a solver from the left tree (toggle dropdown), or type in the search box (`/` jumps to search, `Enter` opens the first match).
 - Press `Ctrl/⌘ + Enter` to Solve.
 - Every result is laid out in the same order: **1 Given → 2 Finding → 3 Formula → 4 Steps → 5 Final Answer (yellow box) → 6 Check → Python code**.
