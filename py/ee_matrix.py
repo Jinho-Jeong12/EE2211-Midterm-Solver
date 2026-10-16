@@ -18,51 +18,66 @@ Main functions
   solution_type(X, y)           unique / infinite / none (rank test)
   solve_system(X, y)            w for Xw = y, picks X^-1 / left inverse / right inverse
   pinv(X)           left inverse (X^T X)^-1 X^T  or  right inverse X^T (X X^T)^-1
+
+Why Fraction instead of numpy floats here:
+  numpy would print 0.3333333 and -2.0000000004; exam answers are usually exact fractions,
+  so every matrix is converted to Fraction first (to_frac_matrix) and all arithmetic stays exact.
+  Matrices are plain Python lists of rows: [[a11, a12], [a21, a22]].
 """
-from fractions import Fraction
-import numpy as np
-from ee_utils import Report, to_frac_matrix
+from fractions import Fraction                     # exact rational numbers, e.g. Fraction(1, 3)
+import numpy as np                                 # only used for the float helpers and the rank-deficient fallback
+from ee_utils import Report, to_frac_matrix        # Report = printer; to_frac_matrix = any matrix -> list of Fraction rows
 
 
-# ---------------- basic exact helpers ----------------
+# =====================================================================
+# 1. Basic exact helpers (work on lists of Fraction rows)
+# =====================================================================
 def _mul(A, B):
+    """Matrix product A B: entry (i, j) = sum over k of A[i][k] * B[k][j]."""
     return [[sum(A[i][k] * B[k][j] for k in range(len(B))) for j in range(len(B[0]))] for i in range(len(A))]
 
 
 def _T(A):
+    """Transpose: rows become columns. zip(*A) walks down the columns of A."""
     return [list(r) for r in zip(*A)]
 
 
 def _eye(n):
+    """n x n identity matrix I (1 on the diagonal, 0 elsewhere)."""
     return [[Fraction(int(i == j)) for j in range(n)] for i in range(n)]
 
 
 def _sub_matrix(A, i, j):
-    """Delete row i and column j (0-based)."""
+    """Delete row i and column j (0-based). Used for minors: M_ij = det(sub_matrix)."""
+    # keep every row except row i, and in each kept row drop element j
     return [row[:j] + row[j + 1:] for k, row in enumerate(A) if k != i]
 
 
-# ---------------- determinant family ----------------
+# =====================================================================
+# 2. Determinant family: det, minor, cofactor, adjugate, inverse
+# =====================================================================
 def det(A, show=True):
-    """Determinant by cofactor expansion along row 1: det A = sum_j (-1)^(1+j) a_1j M_1j."""
+    """Determinant by cofactor expansion along row 1: det A = sum_j (-1)^(1+j) a_1j M_1j.
+    This is recursive: each minor M_1j is itself a determinant of a smaller matrix,
+    until we reach 2 x 2 (ad - bc) or 1 x 1 (the number itself)."""
     A = to_frac_matrix(A)
     n = len(A)
     if n != len(A[0]):
         raise ValueError("det needs a square matrix")
     R = Report("Determinant det(A)", show).given("A", A)
-    if n == 1:
+    if n == 1:                                     # 1 x 1: det [a] = a
         R.answer("det(A)", A[0][0])
         return A[0][0]
-    if n == 2:
+    if n == 2:                                     # 2 x 2: det [[a, b], [c, d]] = ad - bc
         d = A[0][0] * A[1][1] - A[0][1] * A[1][0]
         R.formula("det = a11*a22 - a12*a21", f"= {A[0][0]}*{A[1][1]} - {A[0][1]}*{A[1][0]}")
         R.answer("det(A)", d)
         return d
     R.formula("det(A) = sum_j (-1)^(1+j) * a_1j * M_1j   (expansion along row 1)")
     total = Fraction(0)
-    for j in range(n):
-        m = det(_sub_matrix(A, 0, j), show=False)
-        term = (-1) ** j * A[0][j] * m
+    for j in range(n):                             # go along the first row
+        m = det(_sub_matrix(A, 0, j), show=False)  # minor M_1j: delete row 1 and column j, take det
+        term = (-1) ** j * A[0][j] * m             # sign pattern + - + - ... ((-1)^(1+j) with 1-based j)
         R.step(f"j={j + 1}: (-1)^{1 + j} * {A[0][j]} * M_1{j + 1}({m})", term)
         total += term
     R.answer("det(A)", total)
@@ -70,22 +85,23 @@ def det(A, show=True):
 
 
 def minor(A, i, j, show=True):
-    """Minor M_ij = det of A with row i and column j removed (i, j start at 1)."""
+    """Minor M_ij = det of A with row i and column j removed (i, j start at 1, like the lecture)."""
     A = to_frac_matrix(A)
-    S = _sub_matrix(A, i - 1, j - 1)
+    S = _sub_matrix(A, i - 1, j - 1)               # -1 because Python counts from 0
     m = det(S, show=False)
     Report(f"Minor M_{i}{j}", show).given("A", A).step(f"delete row {i}, column {j}", S).answer(f"M_{i}{j}", m)
     return m
 
 
 def cofactor(A, i, j, show=True):
-    """Cofactor C_ij = (-1)^(i+j) M_ij."""
+    """Cofactor C_ij = (-1)^(i+j) M_ij  (the minor with a checkerboard sign)."""
     c = (-1) ** (i + j) * minor(A, i, j, show=False)
     Report(f"Cofactor C_{i}{j}", show).formula("C_ij = (-1)^(i+j) * M_ij").answer(f"C_{i}{j}", c)
     return c
 
 
 def minors_matrix(A, show=True):
+    """Matrix whose (i, j) entry is the minor M_ij."""
     A = to_frac_matrix(A)
     n = len(A)
     M = [[det(_sub_matrix(A, i, j), show=False) for j in range(n)] for i in range(n)]
@@ -94,6 +110,7 @@ def minors_matrix(A, show=True):
 
 
 def cofactor_matrix(A, show=True):
+    """Matrix of cofactors C (minors with the + - + - checkerboard signs)."""
     A = to_frac_matrix(A)
     n = len(A)
     C = [[(-1) ** (i + j) * det(_sub_matrix(A, i, j), show=False) for j in range(n)] for i in range(n)]
@@ -102,6 +119,7 @@ def cofactor_matrix(A, show=True):
 
 
 def adjugate(A, show=True):
+    """Adjugate (adjoint) adj(A) = transpose of the cofactor matrix."""
     C = cofactor_matrix(A, show=False)
     adj = _T(C)
     Report("Adjugate adj(A) = C^T", show).step("C", C).answer("adj(A)", adj)
@@ -109,57 +127,67 @@ def adjugate(A, show=True):
 
 
 def inverse(A, show=True):
-    """A^-1 = adj(A) / det(A). Returns None when det(A) = 0 (singular)."""
+    """A^-1 = adj(A) / det(A). Returns None when det(A) = 0 (singular, no inverse)."""
     A = to_frac_matrix(A)
     R = Report("Inverse A^-1 = adj(A) / det(A)", show).given("A", A)
     d = det(A, show=False)
     R.step("det(A)", d)
-    if d == 0:
+    if d == 0:                                     # det = 0 -> A is singular -> no inverse
         R.answer("A^-1", "does NOT exist (det = 0, A is singular)")
         return None
     adj = adjugate(A, show=False)
     R.step("adj(A)", adj)
-    inv = [[x / d for x in row] for row in adj]
+    inv = [[x / d for x in row] for row in adj]    # divide every entry of adj(A) by det(A)
     R.answer("A^-1", inv)
-    R.step("check A A^-1 = I", _mul(A, inv))
+    R.step("check A A^-1 = I", _mul(A, inv))       # should print the identity matrix
     return inv
 
 
-# ---------------- rank / row reduction ----------------
+# =====================================================================
+# 3. Rank / row reduction
+# =====================================================================
 def rref(A, show=False):
-    """Gauss-Jordan elimination. Returns (RREF matrix, list of pivot columns)."""
+    """Gauss-Jordan elimination. Returns (RREF matrix, list of pivot columns).
+    For each column from left to right:
+      1. find a row (at or below the current row r) with a non-zero entry -> pivot
+      2. swap that row up to position r
+      3. divide the row by the pivot so the pivot becomes 1
+      4. subtract multiples of it from every OTHER row so the rest of the column becomes 0
+    The number of pivots found = rank."""
     M = to_frac_matrix(A)
     rows, cols = len(M), len(M[0])
-    pivots, r = [], 0
+    pivots, r = [], 0                               # r = row where the next pivot goes
     R = Report("Row reduction (RREF)", show).given("A", M)
     for c in range(cols):
+        # step 1: first row from r downwards with a non-zero entry in column c (None if the column is all 0)
         p = next((i for i in range(r, rows) if M[i][c] != 0), None)
         if p is None:
-            continue
-        M[r], M[p] = M[p], M[r]                     # swap pivot row up
+            continue                                # no pivot in this column -> move to the next column
+        M[r], M[p] = M[p], M[r]                     # step 2: swap pivot row up
         pv = M[r][c]
-        M[r] = [x / pv for x in M[r]]               # scale pivot to 1
-        for i in range(rows):                       # clear the column
+        M[r] = [x / pv for x in M[r]]               # step 3: scale pivot to 1
+        for i in range(rows):                       # step 4: clear the column
             if i != r and M[i][c] != 0:
                 f = M[i][c]
-                M[i] = [a - f * b for a, b in zip(M[i], M[r])]
+                M[i] = [a - f * b for a, b in zip(M[i], M[r])]   # row_i <- row_i - f * pivot_row
         R.step(f"pivot in column {c + 1}", [row[:] for row in M])
         pivots.append(c)
         r += 1
-        if r == rows:
+        if r == rows:                               # every row has a pivot -> done
             break
     return M, pivots
 
 
 def rank(A, show=True):
-    """rank = number of pivots after row reduction."""
+    """rank = number of pivots after row reduction (= number of linearly independent rows / columns)."""
     E, piv = rref(A, show=False)
     Report("Rank", show).given("A", to_frac_matrix(A)).step("RREF", E).answer("rank(A)", len(piv))
     return len(piv)
 
 
 def invertibility(A, show=True):
-    """Square: invertible iff det != 0. m x d: left inverse iff rank = d, right inverse iff rank = m."""
+    """Square: invertible iff det != 0 (iff rank = n).
+    m x d: left inverse exists iff rank = d (full column rank), right inverse iff rank = m (full row rank)."""
     A = to_frac_matrix(A)
     m, d = len(A), len(A[0])
     r = rank(A, show=False)
@@ -174,12 +202,13 @@ def invertibility(A, show=True):
 
 
 def matrix_report(A, show=True):
-    """Everything about one matrix at once."""
+    """Everything about one matrix at once: transpose, rank, invertibility, and for square A:
+    determinant, minors, cofactors, adjugate, inverse; finally the pseudoinverse."""
     A = to_frac_matrix(A)
     out = {"transpose": _T(A), "rank": rank(A, show), **invertibility(A, show=False)}
     if show:
         Report("Transpose A^T").answer("A^T", out["transpose"])
-    if len(A) == len(A[0]):
+    if len(A) == len(A[0]):                         # these only make sense for square matrices
         out["det"] = det(A, show)
         out["minors"] = minors_matrix(A, show)
         out["cofactor"] = cofactor_matrix(A, show)
@@ -191,20 +220,24 @@ def matrix_report(A, show=True):
 
 def lin_indep(vectors, show=True):
     """Vectors are linearly independent iff rank([v1 v2 ...]) = number of vectors."""
-    V = _T(to_frac_matrix(vectors))      # vectors become columns
+    V = _T(to_frac_matrix(vectors))      # each input vector becomes a column
     r = rank(V, show=False)
-    ind = r == len(V[0])
+    ind = r == len(V[0])                 # full column rank <-> no vector is a combination of the others
     R = Report("Linear independence", show).step("matrix with the vectors as columns", V)
     R.step("rank", r).answer("linearly independent?", f"{'YES' if ind else 'NO'} (rank {r} vs {len(V[0])} vectors)")
     return ind
 
 
-# ---------------- systems Xw = y ----------------
+# =====================================================================
+# 4. Systems Xw = y
+# =====================================================================
 def solution_type(X, y, show=True):
-    """rank(X) vs rank([X|y]):  different -> no solution;  equal = d -> unique;  equal < d -> infinite."""
+    """rank(X) vs rank([X|y]):  different -> no solution;  equal = d -> unique;  equal < d -> infinite.
+    [X|y] is the augmented matrix (y glued on as an extra column).
+    If adding y raises the rank, y is not reachable by any combination of X's columns -> no solution."""
     X = to_frac_matrix(X)
     y = [Fraction(v).limit_denominator(10**9) for v in np.ravel(y)]
-    aug = [row + [b] for row, b in zip(X, y)]
+    aug = [row + [b] for row, b in zip(X, y)]       # augmented matrix [X | y]
     rX, rA, d = rank(X, show=False), rank(aug, show=False), len(X[0])
     kind = "no solution" if rX != rA else ("unique solution" if rX == d else "infinitely many solutions")
     m = len(X)
@@ -217,7 +250,9 @@ def solution_type(X, y, show=True):
 
 
 def pinv(X, show=True):
-    """Left inverse (X^T X)^-1 X^T when rank = d (tall), right inverse X^T (X X^T)^-1 when rank = m (wide)."""
+    """Left inverse (X^T X)^-1 X^T when rank = d (tall), right inverse X^T (X X^T)^-1 when rank = m (wide).
+    Left inverse:  X^+ X = I  (used for least squares, m > d).
+    Right inverse: X X^+ = I  (used for the minimum-norm solution, m < d)."""
     X = to_frac_matrix(X)
     m, d = len(X), len(X[0])
     r = rank(X, show=False)
@@ -226,13 +261,13 @@ def pinv(X, show=True):
         P = inverse(X, show=False)
         R.formula("square + invertible: X^+ = X^-1")
     elif r == d:
-        P = _mul(inverse(_mul(_T(X), X), show=False), _T(X))
+        P = _mul(inverse(_mul(_T(X), X), show=False), _T(X))      # (X^T X)^-1 X^T
         R.formula("left inverse X^+ = (X^T X)^-1 X^T", "full column rank")
     elif r == m:
-        P = _mul(_T(X), inverse(_mul(X, _T(X)), show=False))
+        P = _mul(_T(X), inverse(_mul(X, _T(X)), show=False))      # X^T (X X^T)^-1
         R.formula("right inverse X^+ = X^T (X X^T)^-1", "full row rank")
     else:
-        P = np.linalg.pinv(np.array(X, dtype=float))
+        P = np.linalg.pinv(np.array(X, dtype=float))               # rank deficient: use numpy (floats)
         R.formula("rank deficient: Moore-Penrose pseudoinverse (numpy.linalg.pinv)")
     R.answer("X^+", P)
     return P
@@ -242,35 +277,39 @@ def solve_system(X, y, show=True):
     """Solve Xw = y. No bias column is added (a system of equations has no bias).
     m = d -> w = X^-1 y ;  m > d -> least squares w = (X^T X)^-1 X^T y ;  m < d -> w = X^T (X X^T)^-1 y."""
     Xf = to_frac_matrix(X)
-    yf = [[Fraction(v).limit_denominator(10**9)] for v in np.ravel(y)]
+    yf = [[Fraction(v).limit_denominator(10**9)] for v in np.ravel(y)]   # y as an m x 1 column of Fractions
     m, d = len(Xf), len(Xf[0])
     R = Report("Solve Xw = y", show).given("X", Xf).given("y", [v[0] for v in yf])
     kind = solution_type(X, y, show=False)
     R.step(f"m = {m}, d = {d}, solution type: {kind}")
     r = rank(Xf, show=False)
-    if m == d and r == d:
+    if m == d and r == d:                           # square + invertible -> exact unique solution
         R.formula("w = X^-1 y")
         W = _mul(inverse(Xf, show=False), yf)
-    elif m > d and r == d:
+    elif m > d and r == d:                          # tall -> least squares approximation
         R.formula("w = (X^T X)^-1 X^T y", "over-determined: least squares approximation (left inverse)")
         W = _mul(pinv(Xf, show=False), yf)
-    elif m < d and r == m:
+    elif m < d and r == m:                          # wide -> smallest-norm solution among infinitely many
         R.formula("w = X^T (X X^T)^-1 y", "under-determined: minimum-norm solution (right inverse)")
         W = _mul(pinv(Xf, show=False), yf)
-    else:
+    else:                                           # rank deficient -> numpy pseudoinverse
         R.formula("rank deficient -> numpy.linalg.pinv(X) @ y (minimum-norm least squares)")
         W = (np.linalg.pinv(np.array(Xf, dtype=float)) @ np.array(yf, dtype=float)).tolist()
-    w = [row[0] for row in W]
+    w = [row[0] for row in W]                       # m x 1 column -> plain list
     R.answer("w", w)
+    # plug w back in: if Xw equals y the solution is exact, otherwise it is the least squares fit
     R.step("check Xw", [row[0] for row in _mul(Xf, [[Fraction(v).limit_denominator(10**9)] for v in w])])
     return w
 
 
-# ---------------- quick numpy helpers (float) ----------------
+# =====================================================================
+# 5. Quick numpy helpers (float)
+# =====================================================================
 def vec_ops(x, y, show=True):
-    """Dot product, norms, angle between two vectors."""
+    """Dot product, norms, angle between two vectors.
+    cos(angle) = x.y / (||x|| ||y||); x.y = 0 means orthogonal."""
     x, y = np.array(x, float), np.array(y, float)
-    dot = x @ y
+    dot = x @ y                                     # dot product x^T y
     cos = dot / (np.linalg.norm(x) * np.linalg.norm(y))
     out = {"x+y": x + y, "x-y": x - y, "dot x^T y": dot, "||x||": np.linalg.norm(x), "||y||": np.linalg.norm(y),
            "angle (degrees)": np.degrees(np.arccos(np.clip(cos, -1, 1))), "orthogonal?": abs(dot) < 1e-12}
@@ -281,6 +320,7 @@ def vec_ops(x, y, show=True):
 
 
 def set_ops(A, B, show=True):
+    """Intersection, union and differences of two sets (Lecture 4 set notation)."""
     A, B = set(A), set(B)
     out = {"A ∩ B": A & B, "A ∪ B": A | B, "A - B": A - B, "B - A": B - A}
     R = Report("Set operations", show)
