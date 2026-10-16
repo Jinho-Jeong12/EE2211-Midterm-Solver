@@ -1,4 +1,4 @@
-# EE2211 Solver made by Jeong Jinho
+# EE2211-Midterm-Solver made by Jeong Jinho (A0286635R)
 
 > **Development history:** see [`py/README.md` → Development history](py/README.md#development-history).
 > It lists what I built on each date (2 Sep – 16 Oct 2026) and the files that show it.

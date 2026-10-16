@@ -1,4 +1,4 @@
-# EE2211 Solver made by Jeong Jinho
+# EE2211-Midterm-Solver made by Jeong Jinho (A0286635R)
 
 > **Development history:** see the [Development history](#development-history) section at the bottom of this page.
 > The dates come from the files' Created / Modified times on my laptop (macOS Finder → Get Info).
