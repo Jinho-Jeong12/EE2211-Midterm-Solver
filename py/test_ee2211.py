@@ -1,5 +1,5 @@
 # =====================================================================
-# EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
+# EE2211 Solver made by Jeong Jinho (A0286635R)
 # Python version of my own web solver (../src/*.js), Lectures 1-6
 # =====================================================================
 """test_ee2211.py — checks every module against independent numpy / scipy answers

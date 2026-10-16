@@ -1,5 +1,5 @@
 # =====================================================================
-# EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
+# EE2211 Solver made by Jeong Jinho (A0286635R)
 # Python version of my own web solver (../src/*.js), Lectures 1-6
 # =====================================================================
 """ee_regression.py — Lectures 5-6: linear regression, ridge, polynomial, classification.

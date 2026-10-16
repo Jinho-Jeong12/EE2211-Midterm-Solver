@@ -1,5 +1,5 @@
 # =====================================================================
-# EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
+# EE2211 Solver made by Jeong Jinho (A0286635R)
 # Python version of my own web solver (../src/*.js), Lectures 1-6
 # =====================================================================
 """ee_calculus.py — Lecture 4 calculus part + equation solving (symbolic, sympy).

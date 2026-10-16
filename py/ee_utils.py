@@ -1,5 +1,5 @@
 # =====================================================================
-# EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
+# EE2211 Solver made by Jeong Jinho (A0286635R)
 # Python version of my own web solver (../src/*.js), Lectures 1-6
 # =====================================================================
 """ee_utils.py — small helpers shared by every module (printing, fractions).
@@ -13,7 +13,7 @@ from fractions import Fraction
 import numpy as np
 
 np.set_printoptions(precision=6, suppress=True, linewidth=120)
-print("EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)")   # shown once, on the first import
+print("EE2211 Solver made by Jeong Jinho (A0286635R)")   # shown once, on the first import
 
 
 def frac(x, max_den=1000):

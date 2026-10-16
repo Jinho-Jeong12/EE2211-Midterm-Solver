@@ -1,4 +1,4 @@
-# EE2211 Midterm Solver — made by Jeong Jinho (A0286635R)
+# EE2211 Solver made by Jeong Jinho
 
 > **Development history:** see the [Development history](#development-history) section at the bottom of this page.
 > The dates come from the files' Created / Modified times on my laptop (macOS Finder → Get Info).
@@ -42,7 +42,7 @@ I did not use Git, so the dates below come from the files' own creation and modi
 
 | Date (2026) | What I did | Files (evidence) |
 |---|---|---|
-| 2 Sep | Course start: my own study notes and practice code for Lectures 1–4 and Assignment 1 | `../../EE2211 추가적인/study_notes_linear_systems.py` (the m = d / m > d / m < d cases for Xw = y), `EE2211_master_code.ipynb`, `classification_Lec12_annotated.ipynb`, `A1_A0286635R.py` |
+| 2 Sep | Course start: my own study notes and practice code for Lectures 1–4 and Assignment 1 | `study_notes_linear_systems.py` (in my separate study folder on my laptop, outside this repository) (the m = d / m > d / m < d cases for Xw = y), `EE2211_master_code.ipynb`, `classification_Lec12_annotated.ipynb`, `A1_A0286635R.py` |
 | 25 Sep | First version of my web solver: core, matrix, calculus, probability and code tools, plus the first tests | `../src/core.js`, `expr.js`, `common.js`, `tools_matrix.js`, `tools_calc.js`, `tools_prob.js`, `tools_code.js`, `../tests/t1.js`, `t2.js`, `../EE2211_Solver.html` |
 | 26–27 Sep | A tool map slide deck and step-by-step guides | `../EE2211_Solver_Tool_Map.pptx`, `../src/guides.js` |
 | 30 Sep | Text / paste input for matrices, a build script that bundles everything into one file | `../src/textinput.js`, `../build.py`, `../deck/build_deck.js` |
